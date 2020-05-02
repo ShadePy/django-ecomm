@@ -1,34 +1,70 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<table class="table">
-    <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-        </tr>
-        <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-        </tr>
-        <tr>
-            <th scope="row">3</th>
-            <td>Larry</td>
-            <td>the Bird</td>
-            <td>@twitter</td>
-        </tr>
-    </tbody>
-</table>
+<div class="table-responsive" style="margin-top: 70px;">
+    <table class="table">
+        <h3 class="text-center"><b>Order Summary</b></h3>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Item</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Price</th>
+                <th scope="col">Total Item Price</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in object.items.all %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ i.item.item_name }}</td>
+                <td><a href="{% url 'core:remove_single_item_from_cart' i.item.slug %}">
+                        <i class="fas fa-angle-left mr-1"></i></a>
+                    {{ i.quantity }}
+                    <a href="{% url 'core:add-to-cart' i.item.slug %}">
+                        <i class="fas fa-angle-right ml-1"></i>
+                    </a></td>
+                {% if i.item.discount_price %}
+                <td style=" color:brown;">${{ i.item.discount_price }}</td>
+                <td>${{ i.total_discount_price }}</td>
+                {% else %}
+                <td>${{ i.item.price }}</td>
+                <td>${{ i.total_item_price }}</td>
+                {% endif %}
+
+                <td><a href="{{ i.item.get_remove_from_cart_url }}"><i class="fa fa-trash-alt"
+                            style="color:red"></i></a>
+                </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td class="text-center" colspan="5">Your cart is empty</td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <a href="{% url 'core:home' %}" class="btn btn-primary float-right">Back to shopping</a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if object.get_order_total %}
+            <tr class="table-info">
+                <td>Order Total</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>$ {{ object.get_order_total }}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <a class='btn btn-warning float-right ml-2' href='/checkout/'>Proceed to checkout</a>
+                    <a class='btn btn-primary float-right' href='/'>Continue shopping</a>
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

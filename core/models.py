@@ -22,6 +22,7 @@ class Item(models.Model):
     label = models.CharField(choices=Label_CHOICES, max_length=1, default='P')
     price = models.FloatField()
     slug = models.SlugField()
+    description = models.TextField(max_length=35)
     discount_price = models.FloatField(blank=True, null=True)
 
     def get_absolute_url(self):
@@ -47,6 +48,12 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.quantity} of {self.item.item_name}"
 
+    def total_item_price(self):
+        return self.quantity * self.item.price
+
+    def total_discount_price(self):
+        return self.quantity * self.item.discount_price
+
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -57,3 +64,12 @@ class Order(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    def get_order_total(self):
+        total = 0
+        for i in self.items.all():
+            if i.item.discount_price:
+                total += i.quantity * i.item.discount_price
+            else:
+                total += i.quantity * i.item.price
+        return total
